@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Hospital Helpline Chatbot</title>
+<style>
+  body { font-family: -apple-system, Arial, sans-serif; max-width: 640px; margin: 40px auto; background: #f5f5f4; }
+  h1 { font-size: 20px; }
+  #chat { background: #fff; border: 1px solid #ddd; border-radius: 8px; height: 420px; overflow-y: auto; padding: 16px; }
+  .msg { margin: 8px 0; padding: 8px 12px; border-radius: 8px; max-width: 80%; line-height: 1.4; }
+  .user { background: #dbeafe; margin-left: auto; text-align: right; }
+  .bot { background: #f0f0ee; }
+  #inputRow { display: flex; gap: 8px; margin-top: 12px; }
+  #msgInput { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
+  button { padding: 10px 16px; border: none; border-radius: 6px; background: #1d4ed8; color: white; cursor: pointer; }
+  .hint { color: #666; font-size: 13px; margin-top: 10px; }
+</style>
+</head>
+<body>
+<h1>Sunrise General Hospital — Helpline Chatbot</h1>
+<div id="chat"></div>
+<div id="inputRow">
+  <input id="msgInput" type="text" placeholder="Ask about hospital hours, a doctor, or book an appointment...">
+  <button onclick="sendMessage()">Send</button>
+</div>
+<div class="hint">
+  Try: "What time does the hospital open?" · "When is Dr. Anjali Rao available?" ·
+  "Which doctor for Dermatology?" · "Book an appointment with Dr. Karan Bose tomorrow at 10am"
+</div>
+
+<script>
+const chat = document.getElementById('chat');
+const input = document.getElementById('msgInput');
+
+function addMessage(text, sender) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + sender;
+  div.textContent = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+async function sendMessage() {
+  const text = input.value.trim();
+  if (!text) return;
+  addMessage(text, 'user');
+  input.value = '';
+
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: text })
+  });
+  const data = await res.json();
+  addMessage(data.reply, 'bot');
+}
+
+input.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+addMessage("Hi! Ask me about hospital timings, doctor availability, or book an appointment.", 'bot');
+</script>
+</body>
+</html>
